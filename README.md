@@ -8,4 +8,4 @@ npm i discord.js-selfbot-v13 dotenv express
 IMPORTANT
 Place your discord token in the .env folder
 
-TO RUN type node index.js into the terminal
+TO RUN type node index.js into the terminal of visual studio code
