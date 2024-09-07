@@ -9,4 +9,4 @@ dotenv
 express
 
 IMPORTANT
-Place you discord token in the .env folder or else this will not work
+Place your discord token in the .env folder
