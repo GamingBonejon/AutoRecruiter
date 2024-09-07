@@ -2,7 +2,7 @@
 A very simple auto recruiter for rust clans to advertise in multiple discord servers at once.
 
 
-DEPENDANCIES
+NPM Package Installation
 npm i discord.js-selfbot-v13 dotenv express
 
 IMPORTANT
