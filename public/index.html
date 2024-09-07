@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruitment Dashboard</title>
+    <style>
+        /* Your existing styles */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: row;
+            margin: 0;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .form-container {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .text-input, .textarea-input {
+            width: 100%;
+            max-width: 600px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h2 {
+            font-size: 24px;
+        }
+
+        .checkbox-label {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-label input {
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .info-box {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+        max-width: 400px;
+        max-height: 900px; /* Set max height to control the overall height */
+        overflow: auto; /* Hide overflow content */
+        box-sizing: border-box;
+        }
+
+        #entriesList {
+            max-height: 900px; /* Set a maximum height for the list */
+            border-top: 1px solid #ccc; /* Optional: Add a top border */
+            padding-top: 10px; /* Optional: Add padding */
+            margin-top: 10px; /* Optional: Add margin */
+        }
+
+        .info-box h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            margin-bottom: 10px;
+        }
+
+        .info-box .entry {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .info-box .entry img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .info-box .entry .details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sendMessage {
+            margin-top: auto; /* Ensures the button is at the bottom */
+            padding: 10px;
+            text-align: center;
+        }
+
+        .sendMessage button {
+            padding: 20px 40px;
+            font-size: 24px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .sendMessage button:hover {
+            background-color: #218838;
+        }
+
+        .entry {
+        cursor: pointer;
+        }
+
+        .entry:hover {
+            background-color: #c45160;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Recruitment Bot Dashboard</h1>
+
+        <form id="recForm" action="/submitmessage" method="post">
+            <div class="form-section">
+                <h2>Recruitment Message</h2>
+                <label for="recruitmentMessage">Enter your recruitment message:</label><br>
+                <textarea id="recruitmentMessage" name="recruitmentMessage" rows="4" cols="50" class="textarea-input" placeholder="Input your message here..."></textarea>
+            </div>
+
+            <button type="submit" id="recsubmitbutton">Submit Recruitment Message</button>
+        </form>
+
+        <form id="mainForm" action="/submit" method="post">
+
+            <div class="form-section">
+                <h2>Server ID</h2>
+                <label for="serverID">Enter the server ID:</label><br>
+                <input type="text" id="serverID" name="serverID" class="text-input" placeholder="Input the ID here...">
+            </div>
+
+            <div class="form-section">
+                <h2>Channel ID</h2>
+                <label for="channelID">Enter the channel ID:</label><br>
+                <input type="text" id="channelID" name="channelID" class="text-input" placeholder="Input the ID here...">
+            </div>
+
+            <div class="form-section">
+                <label class="checkbox-label">
+                    Is this a Forum?
+                    <input type="checkbox" id="forum" name="forum">
+                </label>
+            </div>
+
+            <div id="additionalFields" class="hidden">
+                <div class="form-section">
+                    <h2>Forum Title</h2>
+                    <label for="forumTitle">Enter forum title:</label><br>
+                    <input type="text" id="forumTitle" name="forumTitle" class="text-input" placeholder="Input forum title...">
+                </div>
+
+                <div class="form-section">
+                    <h2>Forum Tags</h2>
+                    <label for="tagID">Enter forum tag IDs:</label><br>
+                    <textarea id="tagID" name="tagID" rows="4" cols="50" class="textarea-input" placeholder="Input all tag IDs here, each row is a single tag's ID..."></textarea>
+                </div>
+            </div>
+
+            <button type="submit" id="submitButton">Submit</button>
+        </form>
+    </div>
+
+    <div class="sendMessage">
+        <button id="saveButton">Save</button>
+        <button id="sendMessagesButton">Send Messages</button>
+        <button id="loadButton">Load</button>
+    </div>
+
+    <div class="info-box">
+        <h2>Recruitment Message</h2>
+        <p id="recruitmentMessageDisplay">Loading...</p>
+        <div id="entriesList"></div>
+    </div>
+
+    <script>
+        document.getElementById('forum').addEventListener('change', function() {
+            const additionalFields = document.getElementById('additionalFields');
+            if (this.checked) {
+                additionalFields.classList.remove('hidden');
+            } else {
+                additionalFields.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            function redolist(hello) {
+                fetch('/data')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Display the recruitment message
+                        document.getElementById('recruitmentMessageDisplay').textContent = data.recruitmentMessage;
+
+                        // Populate the entries list
+                        const entriesList = document.getElementById('entriesList');
+                        entriesList.innerHTML = '';
+
+                        data.humanizedDependancies.forEach(entry => {
+                            const [guildName, channelName, iconURL] = entry;
+                            const entryDiv = document.createElement('div');
+                            entryDiv.className = 'entry';
+
+                            const img = document.createElement('img');
+                            img.src = iconURL;
+                            img.alt = 'Icon';
+
+                            const detailsDiv = document.createElement('div');
+                            detailsDiv.className = 'details';
+
+                            const guildNameP = document.createElement('p');
+                            guildNameP.textContent = guildName;
+
+                            const channelNameP = document.createElement('p');
+                            channelNameP.textContent = channelName;
+
+                            detailsDiv.appendChild(guildNameP);
+                            detailsDiv.appendChild(channelNameP);
+
+                            entryDiv.appendChild(img);
+                            entryDiv.appendChild(detailsDiv);
+
+                            entriesList.appendChild(entryDiv);                         
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                        document.getElementById('recruitmentMessageDisplay').textContent = 'Error loading data';
+                    });
+            }
+
+            function setupEntryClickHandlers() {
+                // Select all elements with the class 'entry'
+                const entries = document.querySelectorAll('.entry');
+
+                // Loop through each entry and set up a click event listener
+                entries.forEach(entry => {
+                    entry.addEventListener('click', function() {
+                        // Get the guild name from the entry
+                        const guildName = this.querySelector('.details p:first-child').textContent;
+
+                        // Perform fetch request to remove the entry
+                        fetch('/remove', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ guildName })
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                // Remove the entry from the DOM if the response is okay
+                                this.remove();
+                            } else {
+                                console.error('Failed to remove entry.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                    });
+                });
+            }
+
+
+            document.getElementById('entriesList').addEventListener('click', function(event) {
+                const entry = event.target.closest('.entry');
+                if (entry) {
+                    const guildName = entry.querySelector('.details p:first-child').textContent;
+                    fetch('/remove', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ guildName })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            entry.remove(); // Remove the entry from the DOM
+                        } else {
+                            console.error('Failed to remove entry.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                    redolist();
+                }
+            });           
+
+            // Set up the form submission event listener
+            document.getElementById('mainForm').addEventListener('submit', function(event) {
+                redolist();
+            });
+
+            document.getElementById('recForm').addEventListener('submit', function(event) {
+                redolist()
+            });
+
+            setupEntryClickHandlers();
+
+            // Set up the send messages button click event listener
+            document.getElementById('sendMessagesButton').addEventListener('click', function() {
+                fetch('/sendMessages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Messages sent:', data);
+                })
+                .catch(error => {
+                    console.error('Error sending messages:', error);
+                });
+            });
+            
+            document.getElementById('saveButton').addEventListener('click', function() {
+                fetch('/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Messages sent:', data);
+                })
+                .catch(error => {
+                    console.error('Error sending messages:', error);
+                });
+            });
+
+            document.getElementById('loadButton').addEventListener('click', function() {
+                fetch('/load', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Messages sent:', data);
+                })
+                .catch(error => {
+                    console.error('Error sending messages:', error);
+                });
+                setTimeout(() => {
+                    redolist();
+                }, 1000);
+            });
+
+            // Set up the send recruitment message button click event listener
+            document.getElementById('sendRecruitmentMessageButton').addEventListener('click', function() {
+                const recruitmentMessage = document.getElementById('recruitmentMessage').value;
+                fetch('/submitmessage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ recruitmentMessage })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Recruitment message sent:', data);
+                })
+                .catch(error => {
+                    console.error('Error sending recruitment message:', error);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
